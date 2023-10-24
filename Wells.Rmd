@@ -1,0 +1,48 @@
+---
+title: "Wells"
+output: html_document
+date: "2023-10-24"
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+
+library(tidyverse)
+
+library(lubridate)
+```
+
+```{r, echo=FALSE}
+wells <- read.csv("/Users/zoeschopick/Well depth and water level.csv")
+
+wells <- na.omit(wells)
+
+
+```
+
+```{r, echo=FALSE}
+wells <- wells %>%
+  mutate(app_year = as.integer(as.character(year(wells$Application.Date)) ))
+
+wells2 <- wells %>%
+  group_by(app_year) %>%
+  summarize(Depth = as.integer(mean(Well.Depth..ft., na.rm=TRUE)), 
+            Water = as.integer(mean(Water.Level..ft., na.rm=TRUE)))
+
+```
+
+
+```{r, echo=FALSE}
+ggplot() + geom_line(data = wells2, aes(x=app_year, y = Depth), color = "darkorange3") + geom_line(data = wells2, aes(x=app_year, y = Water), color = "blue") + xlab("Application Year") + ylab("Depth (ft)") + geom_point(data = wells2, aes(x=app_year, y = Depth), color = "darkorange3") + geom_point(data = wells2, aes(x=app_year, y = Water), color = "blue") +
+scale_y_continuous(name = "Depth (ft)", sec.axis =sec_axis(~.*1, name = "Water Level (ft)", breaks = c(0, 200, 400, 600, 800, 1000)) , breaks = c(0, 200, 400, 600, 800, 1000)) +
+  theme(axis.line.y.left = element_line(color="darkorange3"), axis.title.y.left = element_text(color="darkorange3"),axis.line.y.right = element_line(color="blue"), axis.title.y.right = element_text(color="blue"), plot.title = element_text(hjust = 0.5, size=15), axis.title = element_text(size = 12)) +
+  ggtitle("Depth and Water Levels in Arizona Wells") + scale_x_continuous(breaks = c(1910, 1930, 1950, 1970, 1990, 2010, 2030)) 
+```
+
+The graph shows the depth and water levels of wells in Arizona over about a 100 year time period. The mean depth and mean water level is shown for each year of data collection. Original data was cleaned prior to import. Only application date, depth, and water level were considered. 
